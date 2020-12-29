@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BaseOutputPath>..\..\out\GetRuntimePack\bin</BaseOutputPath>
+    <BaseIntermediateOutputPath>..\..\out\GetRuntimePack\obj</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

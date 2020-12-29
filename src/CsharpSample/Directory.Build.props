@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BaseOutputPath>..\..\out\CsharpSample\bin</BaseOutputPath>
+    <BaseIntermediateOutputPath>..\..\out\CsharpSample\obj</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

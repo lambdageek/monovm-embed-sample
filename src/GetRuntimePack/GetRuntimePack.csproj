@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- FIXME: Update for net6.0 -->
+    <TargetFramework>net5.0</TargetFramework>
+
+    <RestoreSources>
+      https://api.nuget.org/v3/index.json;
+      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json;
+    </RestoreSources>
+  </PropertyGroup>
+
+ <PropertyGroup>
+   <!-- set if we want llvm or something by setting to .LLVM.AOT -->
+   <RuntimeSuffix></RuntimeSuffix>
+ </PropertyGroup>
+
+ <!-- From https://github.com/EgorBo/MonoNET5Sample/blob/master/Program.csproj#L11 -->
+ <ItemGroup>
+   <KnownFrameworkReference 
+        Include="Microsoft.NETCore.App.Mono$(RuntimeSuffix)"
+        TargetFramework="$(TargetFramework)"
+        RuntimeFrameworkName="Microsoft.NETCore.App"
+        DefaultRuntimeFrameworkVersion="$(BundledNETCorePlatformsPackageVersion)"
+        LatestRuntimeFrameworkVersion="$(BundledNETCorePlatformsPackageVersion)"
+        TargetingPackName="Microsoft.NETCore.App.Ref"
+        TargetingPackVersion="$(BundledNETCorePlatformsPackageVersion)"
+        RuntimePackNamePatterns="Microsoft.NETCore.App.Runtime.Mono$(RuntimeSuffix).**RID**"
+        RuntimePackRuntimeIdentifiers="$(RuntimeIdentifier)"
+        IsTrimmable="true" />
+    <FrameworkReference Remove="Microsoft.NETCore.App" />
+    <FrameworkReference 
+        Include="Microsoft.NETCore.App.Mono$(RuntimeSuffix)" 
+        IsImplicitlyDefined="true" 
+        Pack="true" 
+        PrivateAssets="All" />
+  </ItemGroup>
+
+  <Target Name="EchoRuntimeLocation" AfterTargets="ResolveFrameworkReferences">
+    <ItemGroup>
+      <ProbablyMono Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App.Mono'" />
+    </ItemGroup>
+    <Error Condition="@(ProbablyMono->Count()) != 1" Text="Expected to get exactly one Microsoft.NETCore.App.Mono resolved runtime pack" />
+    <Message Importance="High" Text="I think the runtime pack %(ProbablyMono.Identity) is in: %(ProbablyMono.PackageDirectory)"/>
+    <WriteLinesToFile File="$(OutputPath)runtime-pack-dir.txt" Lines="%(ProbablyMono.PackageDirectory)" />
+  </Target>
+
+</Project>
