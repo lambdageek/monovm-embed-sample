@@ -17,4 +17,11 @@ main (void)
 	int nprops = sizeof(prop_keys)/sizeof(prop_keys[0]);
 	monovm_initialize (nprops, (const char**) &prop_keys, (const char**) &prop_values);
 	MonoDomain *root_domain = mono_jit_init_version ("embedder_sample", "v4.0.30319");
+
+	if (!root_domain) {
+		printf ("root domain was null, expected non-NULL on success\n");
+		return 1;
+	}
+	printf ("runtime initialized\n");
+	return 0;
 }
