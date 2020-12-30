@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <mono/jit/mono-private-unstable.h>
+#include <mono/jit/jit.h>
+#include <mono/metadata/assembly.h>
+#include <mono/metadata/class.h>
+
 static const char* trusted_assemblies[] = {
 #undef TRUSTED_PLATFORM_ASSEMBLY
 #define TRUSTED_PLATFORM_ASSEMBLY(x) x,
@@ -10,14 +15,6 @@ static const char* trusted_assemblies[] = {
 };
 static int num_trusted_assemblies = sizeof (trusted_assemblies) / sizeof (trusted_assemblies[0]);
 
-/* FIXME: get this from somewhere else until the runtime pack includes the public headers */
-int
-monovm_initialize (int propertyCount, const char **propertyKeys, const char **propertyValues);
-
-typedef struct _MonoDomain MonoDomain;
-
-MonoDomain *
-mono_jit_init_version      (const char *root_domain_name, const char *runtime_version);
 
 #ifdef _MSC_VER
 #define PATH_SEP_CHAR ';'
@@ -43,10 +40,22 @@ make_tpa_list (void)
 	return buf;
 }
 
+const char *
+find_assm (const char *base)
+{
+	for (int i = 0; i < num_trusted_assemblies; ++i) {
+		if (strstr (trusted_assemblies [i], base) != NULL) {
+			return trusted_assemblies [i];
+		}
+	}
+	return NULL;
+}
+
 int
 main (void)
 {
 	char *tpa_list = make_tpa_list ();
+	const char *sample_assm = find_assm ("CsharpSample.dll");
 	const char *prop_keys[] = {"TRUSTED_PLATFORM_ASSEMBLIES"};
 	char *prop_values[] = {tpa_list};
 	int nprops = sizeof(prop_keys)/sizeof(prop_keys[0]);
@@ -59,5 +68,45 @@ main (void)
 		return 1;
 	}
 	printf ("runtime initialized\n");
+
+
+	
+
+	MonoAssembly *main_sample_assm = mono_assembly_open (sample_assm, NULL);
+	if (!main_sample_assm) {
+		printf ("Couldn't open \"%s\"\n", sample_assm);
+		return 1;
+	}
+		
+	MonoImage *img = mono_assembly_get_image (main_sample_assm);
+
+	MonoClass *kls = mono_class_from_name (img, "CsharpSample", "SampleClass");
+	if (!kls) {
+		printf ("Coudln't find CsharpSample.SampleClass in \"%s\"\n", sample_assm);
+		return 1;
+	}
+
+	MonoMethod *create = mono_class_get_method_from_name (kls, "Create", 0);
+	if (!create) {
+		printf ("No Create method in CsharpSample.SampleClass\n");
+		return 1;
+	}
+
+	void *args[1];
+	MonoObject *exc;
+
+	MonoObject *obj = mono_runtime_invoke (create, NULL, (void**)&args, NULL);
+
+	MonoMethod *hello = mono_class_get_method_from_name (kls, "Hello", 0);
+
+	if (!hello) {
+		printf ("No Hello method in CsharpSample.SampleClass\n");
+		return 1;
+	}
+
+	mono_runtime_invoke (hello, obj, (void**)&args, NULL);
+
+	fflush (stdout);
+
 	return 0;
 }

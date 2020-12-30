@@ -16,6 +16,8 @@ runtime_dir=$(shell cat $(runtime_pack_dir_file))/runtimes/osx-x64/native
 
 CSHARP_SAMPLE_PUBLISH_DIR:=$(topdir)/out/CSharpSample/bin/Debug/net5.0/osx-x64/publish
 
+MONO_INCLUDE_DIR:=$(topdir)/vendor/mono-headers/include/mono-2.0
+
 SOURCES:= \
 	main.c
 
@@ -35,7 +37,7 @@ $(outdir):
 	mkdir -p $@
 
 $(outdir)/main: $(SOURCES) $(TOUCH_COPY_LIBS) $(GEN_TPA_H) | $(outdir)
-	clang $(CFLAGS) -o $@ $(SOURCES) -DCORELIB_FULL_PATH=\"$(CORELIB_FULL_PATH)\" -L$(runtime_dir) -lcoreclr -I$(GENERATED_DIR)
+	clang $(CFLAGS) -o $@ $(SOURCES) -DCORELIB_FULL_PATH=\"$(CORELIB_FULL_PATH)\" -L$(runtime_dir) -lcoreclr -I$(GENERATED_DIR) -I$(MONO_INCLUDE_DIR)
 	install_name_tool -add_rpath @executable_path/ $@
 
 $(outdir)/.touch-copylibs: $(runtime_pack_dir_file) | $(outdir)

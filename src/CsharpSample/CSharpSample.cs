@@ -9,7 +9,7 @@ namespace CsharpSample
 	    }
 
 	    void Hello () {
-		    Console.WriteLine ("Hello");
+		    Console.WriteLine ("Hello From Managed");
 	    }
     }
 }
