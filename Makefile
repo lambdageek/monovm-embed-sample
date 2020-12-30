@@ -22,6 +22,7 @@ GET_RUNTIME_PACK_SRC:= \
 
 NATIVE_SRC:= \
 	src/native/Makefile \
+	src/native/gen-managed.sh \
 	src/native/main.c
 
 out/.touch-CsharpSample: $(CSHARP_SAMPLE_SRC)
@@ -31,7 +32,7 @@ out/.touch-CsharpSample: $(CSHARP_SAMPLE_SRC)
 $(RUNTIME_PACK_DIR_FILE): $(GET_RUNTIME_PACK_SRC)
 	dotnet publish $< -r osx-x64 --self-contained
 
-out/native/main$(EXE): $(NATIVE_SRC) $(RUNTIME_PACK_DIR_FILE)
+out/native/main$(EXE): $(NATIVE_SRC) $(RUNTIME_PACK_DIR_FILE) out/.touch-CsharpSample
 	make -C src/native runtime_pack_dir_file=$(realpath $(RUNTIME_PACK_DIR_FILE))
 
 run: out/native/main$(EXE)
