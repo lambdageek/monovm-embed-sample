@@ -7,7 +7,7 @@ A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native
 ## Limitations ##
 
 * This sample assumes OSX x64 in many places.
-* It needs the mono embedding hearders which are currently not included in the runtime packs, 
+* It needs the mono embedding hearders which are currently not included in the runtime packs ([dotnet/runtime#46461](https://github.com/dotnet/runtime/issues/46461)), 
   the sample includes them in the `vendor/mono-headers/` directory, but this is not a good idea.
 * It uses a gross hack to download a `Microsoft.NETCore.App.Mono` runtime pack for the current platform and to find the native Mono library within it.
 
