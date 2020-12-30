@@ -16,6 +16,8 @@
  </PropertyGroup>
 
  <!-- From https://github.com/EgorBo/MonoNET5Sample/blob/master/Program.csproj#L11 -->
+ <!-- This will eventually be obsoleted by https://github.com/dotnet/sdk/pull/11824 but
+      there's no KnownRuntimePack for any MonoVM runtime packs yet. -->
  <ItemGroup>
    <KnownFrameworkReference 
         Include="Microsoft.NETCore.App.Mono$(RuntimeSuffix)"
@@ -36,6 +38,10 @@
         PrivateAssets="All" />
   </ItemGroup>
 
+  <!-- All we really want is just to find out the directory where NuGet will download microsoft.netcore.app.runtime.mono.osx-x64
+       but it seems like the only time that that's available in a convenient item is if you run `dotnet publish -r <RID>  --self-contained` and the `ResolveFrameworkReferences`
+       target will set `ResolvedRuntimePack` to a list of items with  a `PackageDirectory` metadata.  So we have this dummy project just to get that.
+    -->
   <Target Name="EchoRuntimeLocation" AfterTargets="ResolveFrameworkReferences">
     <ItemGroup>
       <ProbablyMono Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App.Mono'" />
