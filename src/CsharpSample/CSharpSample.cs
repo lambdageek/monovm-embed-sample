@@ -9,6 +9,7 @@ namespace CsharpSample
 	    }
 
 	    void Hello () {
+		    Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
 		    Console.WriteLine ("Hello From Managed");
 	    }
     }
