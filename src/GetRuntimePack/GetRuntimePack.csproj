@@ -39,14 +39,14 @@
   </ItemGroup>
 
   <!-- All we really want is just to find out the directory where NuGet will download microsoft.netcore.app.runtime.mono.osx-x64
-       but it seems like the only time that that's available in a convenient item is if you run `dotnet publish -r <RID>  --self-contained` and the `ResolveFrameworkReferences`
+       but it seems like the only time that that's available in a convenient item is if you run `dotnet publish -r <RID>  - -self-contained` and the `ResolveFrameworkReferences`
        target will set `ResolvedRuntimePack` to a list of items with  a `PackageDirectory` metadata.  So we have this dummy project just to get that.
     -->
   <Target Name="EchoRuntimeLocation" AfterTargets="ResolveFrameworkReferences">
     <ItemGroup>
-      <ProbablyMono Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App.Mono'" />
+      <ProbablyMono Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App.Mono$(RuntimeSuffix)'" />
     </ItemGroup>
-    <Error Condition="@(ProbablyMono->Count()) != 1" Text="Expected to get exactly one Microsoft.NETCore.App.Mono resolved runtime pack" />
+    <Error Condition="@(ProbablyMono->Count()) != 1" Text="Expected to get exactly one Microsoft.NETCore.App.Mono resolved runtime pack, got @(ProbablyMono->Count())" />
     <Message Importance="High" Text="I think the runtime pack %(ProbablyMono.Identity) is in: %(ProbablyMono.PackageDirectory)"/>
     <WriteLinesToFile File="$(OutputPath)runtime-pack-dir.txt" Lines="%(ProbablyMono.PackageDirectory)" />
   </Target>
