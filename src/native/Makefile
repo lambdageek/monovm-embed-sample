@@ -10,11 +10,11 @@ CFLAGS=-std=c99 -g
 
 SOEXT?=.dylib
 
-runtime_pack_dir_file?=$(topdir)/out/GetRuntimePack/bin/Debug/net5.0/osx-x64/runtime-pack-dir.txt
+runtime_pack_dir_file?=$(topdir)/out/GetRuntimePack/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
 
-runtime_dir=$(shell cat $(runtime_pack_dir_file))/runtimes/osx-x64/native
+runtime_dir=$(shell cat $(runtime_pack_dir_file))/runtimes/$(RUNTIME_IDENTIFIER)/native
 
-CSHARP_SAMPLE_PUBLISH_DIR:=$(topdir)/out/CSharpSample/bin/Debug/net5.0/osx-x64/publish
+CSHARP_SAMPLE_PUBLISH_DIR:=$(topdir)/out/CSharpSample/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/publish
 
 MONO_INCLUDE_DIR:=$(topdir)/vendor/mono-headers/include/mono-2.0
 

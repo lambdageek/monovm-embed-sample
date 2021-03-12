@@ -11,7 +11,6 @@ A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native
 * It needs the mono embedding hearders which are currently not included in the runtime packs ([dotnet/runtime#46461](https://github.com/dotnet/runtime/issues/46461)), 
   the sample includes them in the `vendor/mono-headers/` directory, but this is not a good idea.
 * It uses a gross hack to download a `Microsoft.NETCore.App.Mono` runtime pack for the current platform and to find the native Mono library within it.
-* It pulls .NET 5 runtime packs, not .NET 6 previews
 
 ### Help Wanted ###
 
@@ -21,7 +20,7 @@ A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native
 
 ## Prerequisites ##
 
-* .NET 5 SDK
+* .NET 6 Preview 2 SDK (.NET 5 works too; later previews of .NET 6 may work as well)
 * Clang (Xcode)
 * GNU Make
 
@@ -36,6 +35,7 @@ Run `make run`, or `out/native/main` directly.
 Expected output:
 ```
 runtime initialized
+.NET 6.0.0-preview.2.21154.6
 Hello From Managed
 ```
 

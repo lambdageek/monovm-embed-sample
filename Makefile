@@ -1,9 +1,17 @@
 
 .PHONY: all run clean
 
+# should match what's in the .csproj files, but we pass -p:TargetFramework to
+# msbuild below directly, so we will override
+TARGET_FRAMEWORK?=net6.0
+RUNTIME_IDENTIFIER?=osx-x64
+
+export TARGET_FRAMEWORK
+export RUNTIME_IDENTIFIER
+
 EXE:=
 
-RUNTIME_PACK_DIR_FILE:= out/GetRuntimePack/bin/Debug/net5.0/osx-x64/runtime-pack-dir.txt
+RUNTIME_PACK_DIR_FILE:= out/GetRuntimePack/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
 
 all: out/.touch-CsharpSample $(RUNTIME_PACK_DIR_FILE) out/native/main$(EXE)
 
@@ -26,13 +34,14 @@ NATIVE_SRC:= \
 	src/native/main.c
 
 out/.touch-CsharpSample: $(CSHARP_SAMPLE_SRC)
-	dotnet publish $< -r osx-x64 --self-contained 
+	dotnet publish $< -r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) --self-contained
 	touch $@
 
 $(RUNTIME_PACK_DIR_FILE): $(GET_RUNTIME_PACK_SRC)
-	dotnet publish $< -r osx-x64 --self-contained
+	dotnet publish $< -r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) --self-contained
 
 out/native/main$(EXE): $(NATIVE_SRC) $(RUNTIME_PACK_DIR_FILE) out/.touch-CsharpSample
+	if [ "z$(RUNTIME_PACK_DIR_FILE)" = z -o ! -f "$(RUNTIME_PACK_DIR_FILE)" ]; then echo RUNTIME_PACK_DIR_FILE=$(RUNTIME_PACK_DIR_FILE) does not exist ; false ; fi
 	make -C src/native runtime_pack_dir_file=$(realpath $(RUNTIME_PACK_DIR_FILE))
 
 run: out/native/main$(EXE)

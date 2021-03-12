@@ -10,6 +10,11 @@ fi
 
 d=$(realpath $1);
 
+if [ "z${d}" = z -o ! -d "${d}" ] ; then
+    echo publish dir ${d} does not exist
+    exit 1
+fi
+
 cat - <<EOF
 /*
  * DO NOT EDIT
