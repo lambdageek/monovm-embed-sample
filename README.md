@@ -40,3 +40,53 @@ Hello From Managed
 ```
 
 
+## Using a local build of the runtime ##
+
+This is the process for using this sample with a local build of the runtime.
+
+### Building the runtime ###
+
+Build a checkout of dotnet/runtime using something like
+
+```
+./build.sh -s mono+libs -c Release
+```
+
+Verify that `artifacts/bin/microsoft.netcore.app.runtime.osx-x64/Release` (or
+other RID and configuration) exists.  It should contain a
+`runtimes/osx-x64/native` directory.  The makefile dependson it.
+
+### Limitations ###
+
+1. The `CsharpSample` is compiled using a normal (installed) `dotnet` SDK, so
+it won't be able to directly use any new managed APIs from the dotnet/runtime
+checkout.  If the new API is in `System.Private.CoreLib.dll`, you may be able
+to call it using reflection.
+
+2. We will take most libraries from the normal installed dotnet runtime, the
+only thing we pick up from the local build is `libcoreclr.dylib` and
+`System.Private.CoreLib.dll` this may lead to broken apps.
+
+3. If you add a new `MONO_API` and want ot use it in the native sample, you
+   will need to update the headers in `vendor/mono-headers` to include it.
+
+### Building the sample ###
+
+Pass the `LOCAL_RUNTIME` variable on the `make` command line:
+
+```
+make LOCAL_RUNTIME=~/work/runtime/artifacts/bin/microsoft.netcore.app.runtime.osx-x64/Release
+make LOCAL_RUNTIME=~/work/runtime/artifacts/bin/microsoft.netcore.app.runtime.osx-x64/Release run
+```
+
+The output from running should be
+
+```
+runtime initialized
+.NET 6.0.0-dev
+Hello From Managed
+```
+
+If it doesn't say `.NET 6.0.0-dev` it's not using the local build.
+
+When in doubt, `rm -rf out/` and try again.
