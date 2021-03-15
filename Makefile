@@ -57,8 +57,12 @@ out/native/main$(EXE): $(NATIVE_SRC) $(RUNTIME_PACK_DIR_FILE) out/.touch-CsharpS
 	if [ "z$(RUNTIME_PACK_DIR_FILE)" = z -o ! -f "$(RUNTIME_PACK_DIR_FILE)" ]; then echo RUNTIME_PACK_DIR_FILE=$(RUNTIME_PACK_DIR_FILE) does not exist ; false ; fi
 	make -C src/native runtime_pack_dir_file=$(realpath $(RUNTIME_PACK_DIR_FILE))
 
+ifeq ($(SYSTEM),linux)
+SET_LDLIBRARY_PATH=LD_LIBRARY_PATH=out/native
+endif
+
 run: out/native/main$(EXE)
-	out/native/main$(EXE)
+	$(SET_LDLIBRARY_PATH) out/native/main$(EXE)
 
 clean:
 	-rm -rf out

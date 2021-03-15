@@ -31,8 +31,10 @@ GEN_TPA_H=$(GENERATED_DIR)/tpa.h
 
 ifeq ($(SYSTEM),osx)
 INSTALL_NAME_TOOL_CMD:=install_name_tool -add_rpath @executable_path/
-else
+PATCHELF_CMD:=-true
+else if ($(SYSTEM),linux)
 INSTALL_NAME_TOOL_CMD:=-true
+PATCHELF_CMD:=cd $(outdir) && patchelf --set-soname libcoreclr$(SOEXT) libcoreclr$(SOEXT)
 endif
 
 .PHONY: all
@@ -43,12 +45,13 @@ $(outdir):
 	mkdir -p $@
 
 $(outdir)/main: $(SOURCES) $(TOUCH_COPY_LIBS) $(GEN_TPA_H) | $(outdir)
-	clang $(CFLAGS) -o $@ $(SOURCES) -DCORELIB_FULL_PATH=\"$(CORELIB_FULL_PATH)\" -L$(runtime_dir) -lcoreclr -I$(GENERATED_DIR) -I$(MONO_INCLUDE_DIR)
+	clang $(CFLAGS) -o $@ $(SOURCES) -DCORELIB_FULL_PATH=\"$(CORELIB_FULL_PATH)\" -L$(outdir) -lcoreclr -I$(GENERATED_DIR) -I$(MONO_INCLUDE_DIR)
 	$(INSTALL_NAME_TOOL_CMD) $@
 
-$(outdir)/.touch-copylibs: $(runtime_pack_dir_file) | $(outdir)
+$(TOUCH_COPY_LIBS): $(runtime_pack_dir_file) | $(outdir)
 	cp $(runtime_dir)/*$(SOEXT) $(outdir)
 	cp $(runtime_dir)/System.Private.CoreLib.dll $(outdir)
+	$(PATCHELF_CMD)
 	touch $@
 
 $(GENERATED_DIR):
