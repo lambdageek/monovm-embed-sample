@@ -7,10 +7,11 @@ A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native
 
 ## Limitations ##
 
-* This sample assumes OSX x64 in many places.
+* Only works on OSX or Ubuntu 20.04 (other recent Linux distros may work too)
 * It needs the mono embedding hearders which are currently not included in the runtime packs ([dotnet/runtime#46461](https://github.com/dotnet/runtime/issues/46461)), 
   the sample includes them in the `vendor/mono-headers/` directory, but this is not a good idea.
 * It uses a gross hack to download a `Microsoft.NETCore.App.Mono` runtime pack for the current platform and to find the native Mono library within it.
+* Until https://github.com/dotnet/runtime/issues/49661 is fixed, Linux builds need `patchelf`
 
 ### Help Wanted ###
 
@@ -21,8 +22,9 @@ A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native
 ## Prerequisites ##
 
 * .NET 6 Preview 2 SDK (.NET 5 works too; later previews of .NET 6 may work as well)
-* Clang (Xcode)
+* Clang (Xcode on osx, or manually install on Linux)
 * GNU Make
+* (Linux only) [`patchelf`](https://github.com/NixOS/patchelf) (Ubuntu has a .deb package)
 
 ## Building ##
 
@@ -30,7 +32,7 @@ Just run `make` from the toplevel folder
 
 ## Running ##
 
-Run `make run`, or `out/native/main` directly.
+Run `make run`, or `out/native/main` directly. (You may need to set `LD_LIBRARY_PATH` on Linux)
 
 Expected output:
 ```
