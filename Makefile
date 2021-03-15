@@ -1,15 +1,15 @@
 
 .PHONY: all run clean
 
-# should match what's in the .csproj files, but we pass -p:TargetFramework to
-# msbuild below directly, so we will override
+include os-detect.mk
+
+# should match what's in the .csproj files
 TARGET_FRAMEWORK?=net6.0
-RUNTIME_IDENTIFIER?=osx-x64
+RUNTIME_IDENTIFIER?=$(SYSTEM)-x64
 
 export TARGET_FRAMEWORK
 export RUNTIME_IDENTIFIER
 
-EXE:=
 
 ifndef LOCAL_RUNTIME
 RUNTIME_PACK_DIR_FILE:= out/GetRuntimePack/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
@@ -25,7 +25,7 @@ GET_RUNTIME_PACK_CSPROJ:= src/GetRuntimePack/GetRuntimePack.csproj
 
 CSHARP_SAMPLE_SRC:= \
 	$(CSHARP_SAMPLE_CSPROJ)	\
-	src/CsharpSample/CsharpSample.cs	\
+	src/CsharpSample/CSharpSample.cs	\
 	src/CsharpSample/Directory.Build.props
 
 GET_RUNTIME_PACK_SRC:= \
@@ -37,13 +37,15 @@ NATIVE_SRC:= \
 	src/native/gen-managed.sh \
 	src/native/main.c
 
+DOTNET_PUBLISH_ARGS=-r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) -p:TargetFramework=$(TARGET_FRAMEWORK)
+
 out/.touch-CsharpSample: $(CSHARP_SAMPLE_SRC)
-	dotnet publish $< -r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) --self-contained
+	dotnet publish $< $(DOTNET_PUBLISH_ARGS) --self-contained
 	touch $@
 
 ifndef LOCAL_RUNTIME
 $(RUNTIME_PACK_DIR_FILE): $(GET_RUNTIME_PACK_SRC)
-	dotnet publish $< -r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) --self-contained
+	dotnet publish $< $(DOTNET_PUBLISH_ARGS) --self-contained
 else
 $(RUNTIME_PACK_DIR_FILE): $(LOCAL_RUNTIME)
 	if [ "z$(LOCAL_RUNTIME)" = z -o ! -d "$(LOCAL_RUNTIME)/runtimes/$(RUNTIME_IDENTIFIER)/native" ]; then echo expected $(LOCAL_RUNTIME) to contain a runtimes/$(RUNTIME_IDENTIFIER)/native subdirectory; false ; fi
