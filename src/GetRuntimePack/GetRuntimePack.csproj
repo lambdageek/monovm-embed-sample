@@ -3,50 +3,23 @@
   <PropertyGroup>
     <!-- FIXME: Update for net6.0 -->
     <TargetFramework>net6.0</TargetFramework>
-
-    <RestoreSources>
-      https://api.nuget.org/v3/index.json;
-      https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json;
-    </RestoreSources>
   </PropertyGroup>
 
- <PropertyGroup>
-   <!-- set if we want llvm or something by setting to .LLVM.AOT -->
-   <RuntimeSuffix></RuntimeSuffix>
- </PropertyGroup>
+  <!-- This plus a non-empty $(RuntimeIdentifier) are enough to choose Mono -->
+  <PropertyGroup>
+    <UseMonoRuntime>true</UseMonoRuntime>
+  </PropertyGroup>
 
- <!-- From https://github.com/EgorBo/MonoNET5Sample/blob/master/Program.csproj#L11 -->
- <!-- This will eventually be obsoleted by https://github.com/dotnet/sdk/pull/11824 but
-      there's no KnownRuntimePack for any MonoVM runtime packs yet. -->
- <ItemGroup>
-   <KnownFrameworkReference 
-        Include="Microsoft.NETCore.App.Mono$(RuntimeSuffix)"
-        TargetFramework="$(TargetFramework)"
-        RuntimeFrameworkName="Microsoft.NETCore.App"
-        DefaultRuntimeFrameworkVersion="$(BundledNETCorePlatformsPackageVersion)"
-        LatestRuntimeFrameworkVersion="$(BundledNETCorePlatformsPackageVersion)"
-        TargetingPackName="Microsoft.NETCore.App.Ref"
-        TargetingPackVersion="$(BundledNETCorePlatformsPackageVersion)"
-        RuntimePackNamePatterns="Microsoft.NETCore.App.Runtime.Mono$(RuntimeSuffix).**RID**"
-        RuntimePackRuntimeIdentifiers="$(RuntimeIdentifier)"
-        IsTrimmable="true" />
-    <FrameworkReference Remove="Microsoft.NETCore.App" />
-    <FrameworkReference 
-        Include="Microsoft.NETCore.App.Mono$(RuntimeSuffix)" 
-        IsImplicitlyDefined="true" 
-        Pack="true" 
-        PrivateAssets="All" />
-  </ItemGroup>
-
-  <!-- All we really want is just to find out the directory where NuGet will download microsoft.netcore.app.runtime.mono.osx-x64
-       but it seems like the only time that that's available in a convenient item is if you run `dotnet publish -r <RID>  - -self-contained` and the `ResolveFrameworkReferences`
-       target will set `ResolvedRuntimePack` to a list of items with  a `PackageDirectory` metadata.  So we have this dummy project just to get that.
-    -->
   <Target Name="EchoRuntimeLocation" AfterTargets="ResolveFrameworkReferences">
+    <Error Condition="'$(RuntimeIdentifier)' == ''" Message="Need to set RuntimeIdentifier to the target platform RID" />
     <ItemGroup>
-      <ProbablyMono Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App.Mono$(RuntimeSuffix)'" />
+      <ProbablyMono Include="@(ResolvedRuntimePack)" Condition="'%(ResolvedRuntimePack.FrameworkName)' == 'Microsoft.NETCore.App'" />
     </ItemGroup>
     <Error Condition="@(ProbablyMono->Count()) != 1" Text="Expected to get exactly one Microsoft.NETCore.App.Mono resolved runtime pack, got @(ProbablyMono->Count())" />
+    <PropertyGroup>
+      <LikelyMono>@(ProbablyMono)</LikelyMono>
+    </PropertyGroup>
+    <Error Condition="!$(LikelyMono.Contains('Microsoft.NETCore.App.Runtime.Mono'))" Message="Expected '@(ProbablyMono)' to include 'Microsoft.NETCore.App.Runtime.Mono' in the name." />
     <Message Importance="High" Text="I think the runtime pack %(ProbablyMono.Identity) is in: %(ProbablyMono.PackageDirectory)"/>
     <WriteLinesToFile File="$(OutputPath)runtime-pack-dir.txt" Lines="%(ProbablyMono.PackageDirectory)" />
   </Target>

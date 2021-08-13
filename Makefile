@@ -45,7 +45,7 @@ out/.touch-CsharpSample: $(CSHARP_SAMPLE_SRC)
 
 ifndef LOCAL_RUNTIME
 $(RUNTIME_PACK_DIR_FILE): $(GET_RUNTIME_PACK_SRC)
-	dotnet publish $< $(DOTNET_PUBLISH_ARGS) --self-contained
+	dotnet publish $< $(DOTNET_PUBLISH_ARGS) --self-contained  /bl:out/GetRuntimePack.binlog
 else
 $(RUNTIME_PACK_DIR_FILE): $(LOCAL_RUNTIME)
 	if [ "z$(LOCAL_RUNTIME)" = z -o ! -d "$(LOCAL_RUNTIME)/runtimes/$(RUNTIME_IDENTIFIER)/native" ]; then echo expected $(LOCAL_RUNTIME) to contain a runtimes/$(RUNTIME_IDENTIFIER)/native subdirectory; false ; fi
