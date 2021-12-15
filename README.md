@@ -2,7 +2,7 @@
 
 **WARNING** This code is **EXPERIMENTAL** and not supported.
 
-A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native desktop application.
+A sample suite of projects to show how to embed the .NET 6 MonoVM in a native desktop application.
 
 
 ## Limitations ##
@@ -20,7 +20,7 @@ A sample suite of projects to show how to embed .NET 5/.NET 6 MonoVM in a native
 
 ## Prerequisites ##
 
-* .NET 6 Preview 7 SDK
+* .NET 6 SDK
 * Clang (Xcode on osx, or manually install on Linux)
 * GNU Make
 * (Linux only) [`patchelf`](https://github.com/NixOS/patchelf) (Ubuntu has a .deb package)
@@ -36,10 +36,9 @@ Run `make run`, or `out/native/main` directly. (You may need to set `LD_LIBRARY_
 Expected output:
 ```
 runtime initialized
-.NET 6.0.0-preview.7.21377.19
+.NET 6.0.1
 Hello From Managed
 ```
-
 
 ## Using a local build of the runtime ##
 
@@ -84,10 +83,10 @@ The output from running should be
 
 ```
 runtime initialized
-.NET 6.0.0-dev
+.NET 7.0.0-dev
 Hello From Managed
 ```
 
-If it doesn't say `.NET 6.0.0-dev` it's not using the local build.
+If it doesn't say `.NET 7.0.0-dev` it's not using the local build.
 
 When in doubt, `rm -rf out/` and try again.
