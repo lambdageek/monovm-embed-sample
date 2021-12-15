@@ -22,6 +22,13 @@ static int num_trusted_assemblies = sizeof (trusted_assemblies) / sizeof (truste
 #define PATH_SEP_CHAR ':'
 #endif
 
+/**
+ * Make the trusted platform assemblies property for the runtime.
+ * The TPA is a path-separator separated list of assembly filenames that the runtime will use to load assemblies.
+ * The list should include System.Private.CoreLib as well as the needed base class library assemblies,
+ * and any assemblies used by the managed app code itself.
+ * 
+ */
 char *
 make_tpa_list (void)
 {
@@ -40,28 +47,19 @@ make_tpa_list (void)
 	return buf;
 }
 
-const char *
-find_assm (const char *base)
-{
-	for (int i = 0; i < num_trusted_assemblies; ++i) {
-		if (strstr (trusted_assemblies [i], base) != NULL) {
-			return trusted_assemblies [i];
-		}
-	}
-	return NULL;
-}
+/* This is a magic number that must be passed to mono_jit_init_version */
+#define FRAMEWORK_VERSION "v4.0.30319"
 
 int
 main (void)
 {
 	char *tpa_list = make_tpa_list ();
-	const char *sample_assm = find_assm ("CsharpSample.dll");
 	const char *prop_keys[] = {"TRUSTED_PLATFORM_ASSEMBLIES"};
 	char *prop_values[] = {tpa_list};
 	int nprops = sizeof(prop_keys)/sizeof(prop_keys[0]);
 	monovm_initialize (nprops, (const char**) &prop_keys, (const char**) &prop_values);
 	free (tpa_list);
-	MonoDomain *root_domain = mono_jit_init_version ("embedder_sample", "v4.0.30319");
+	MonoDomain *root_domain = mono_jit_init_version ("embedder_sample", FRAMEWORK_VERSION);
 
 	if (!root_domain) {
 		printf ("root domain was null, expected non-NULL on success\n");
@@ -69,14 +67,24 @@ main (void)
 	}
 	printf ("runtime initialized\n");
 
+	const char *sample_assm = "CsharpSample, Version=1.0.0.1"; /* can also specify Culture and PublicKeyToken */
 
-	
+	MonoAssemblyName *aname = mono_assembly_name_new (sample_assm);
 
-	MonoAssembly *main_sample_assm = mono_assembly_open (sample_assm, NULL);
-	if (!main_sample_assm) {
-		printf ("Couldn't open \"%s\"\n", sample_assm);
+	if (!aname) {
+		printf ("Couldn't parse assembly name '%s'\n", sample_assm);
 		return 1;
 	}
+	
+	MonoImageOpenStatus status;
+	MonoAssembly *main_sample_assm = mono_assembly_load_full (aname, /*basedir*/ NULL, &status, 0);
+
+	if (!main_sample_assm || status != MONO_IMAGE_OK) {
+		printf ("Couldn't open \"%s\", (status=0x%08x)\n", sample_assm, status);
+		return 1;
+	}
+	mono_assembly_name_free (aname);
+	aname = NULL;
 		
 	MonoImage *img = mono_assembly_get_image (main_sample_assm);
 
