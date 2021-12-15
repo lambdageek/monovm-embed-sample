@@ -41,6 +41,10 @@ runtime initialized
 Hello From Managed
 ```
 
+## Detailed description of the sample ##
+
+See [DETAILS.md](DETAILS.md)
+
 ## Using a local build of the runtime ##
 
 This is the process for using this sample with a local build of the runtime.
