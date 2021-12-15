@@ -4,19 +4,19 @@
 
 A sample suite of projects to show how to embed the .NET 6 MonoVM in a native desktop application.
 
-
 ## Limitations ##
 
-* Only works on OSX or Debian 11, or Ubuntu 20.04 (other recent Linux distros may work too)
-* It needs the mono embedding hearders which are currently not included in the runtime packs ([dotnet/runtime#46461](https://github.com/dotnet/runtime/issues/46461)), 
+* Only works on OSX or Debian 11, or Ubuntu 20.04 (other recent Linux distros may work too)  
+   This is a limitation of the sample, not a limitation of the MonoVM itself.  Embedding on other platforms where Mono works (Windows, Android, iOS) is possible.  [PRs welcome!](https://github.com/lambdageek/monovm-embed-sample/compare)
+* It needs the mono embedding hearders which are currently not included in the runtime packs ([dotnet/runtime#46461](https://github.com/dotnet/runtime/issues/46461)),
   the sample includes them in the `vendor/mono-headers/` directory, but this is not a good idea.
-* Until https://github.com/dotnet/runtime/issues/49661 is fixed, Linux builds need `patchelf`
+* Until [dotnet/runtime#49661](https://github.com/dotnet/runtime/issues/49661) is fixed, Linux builds need `patchelf`
 
 ### Help Wanted ###
 
-- If there's a problem in the sample [open an Issue in this repo](https://github.com/lambdageek/monovm-embed-sample/issues/new/choose)
-- If the sample doesn't work [open an Issue in dotnet/runtime](https://github.com/dotnet/runtime/issues/new/choose) and mention "Mono embedding API"
-- If you can improve the sample [please open a PR](https://github.com/lambdageek/monovm-embed-sample/compare) 
+* If there's a problem in the sample [open an Issue in this repo](https://github.com/lambdageek/monovm-embed-sample/issues/new/choose)
+* If the sample doesn't work [open an Issue in dotnet/runtime](https://github.com/dotnet/runtime/issues/new/choose) and mention "Mono embedding API"
+* If you can improve the sample [please open a PR](https://github.com/lambdageek/monovm-embed-sample/compare)
 
 ## Prerequisites ##
 
@@ -34,7 +34,8 @@ Just run `make` from the toplevel folder
 Run `make run`, or `out/native/main` directly. (You may need to set `LD_LIBRARY_PATH` on Linux)
 
 Expected output:
-```
+
+```console
 runtime initialized
 .NET 6.0.1
 Hello From Managed
@@ -48,7 +49,7 @@ This is the process for using this sample with a local build of the runtime.
 
 Build a checkout of dotnet/runtime using something like
 
-```
+```console
 ./build.sh -s mono+libs -c Release
 ```
 
@@ -56,7 +57,7 @@ Verify that `artifacts/bin/microsoft.netcore.app.runtime.osx-x64/Release` (or
 other RID and configuration) exists.  It should contain a
 `runtimes/osx-x64/native` directory.  The makefile dependson it.
 
-### Limitations ###
+### Local build limitations ###
 
 1. The `CsharpSample` is compiled using a normal (installed) `dotnet` SDK, so
 it won't be able to directly use any new managed APIs from the dotnet/runtime
@@ -74,14 +75,14 @@ only thing we pick up from the local build is `libcoreclr.dylib` and
 
 Pass the `LOCAL_RUNTIME` variable on the `make` command line:
 
-```
+```console
 make LOCAL_RUNTIME=~/work/runtime/artifacts/bin/microsoft.netcore.app.runtime.osx-x64/Release
 make LOCAL_RUNTIME=~/work/runtime/artifacts/bin/microsoft.netcore.app.runtime.osx-x64/Release run
 ```
 
 The output from running should be
 
-```
+```console
 runtime initialized
 .NET 7.0.0-dev
 Hello From Managed
