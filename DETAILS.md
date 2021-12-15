@@ -2,7 +2,7 @@
 
 At a high level, the sample does 3 things:
 
-1. Compiles and publishes a managed C# library [src/CSharpSample/](src/CSharpSample/).
+1. Compiles and publishes a managed C# library [src/CsharpSample/](src/CsharpSample/).
 2. Compiles and publishes a stub C# project that uses a custom target to write the location of the Mono runtime pack to a file. [src/GetRuntimePack/](src/GetRuntimePack/).
 3. Compiles a native application that links with the Mono runtime from the runtime pack and that loads and runs some code from the sample C# library. [src/native/](src/native/).
 
