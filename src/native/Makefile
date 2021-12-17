@@ -32,7 +32,7 @@ GEN_TPA_H=$(GENERATED_DIR)/tpa.h
 ifeq ($(SYSTEM),osx)
 INSTALL_NAME_TOOL_CMD:=install_name_tool -add_rpath @executable_path/
 PATCHELF_CMD:=-true
-else if ($(SYSTEM),linux)
+else ifeq ($(SYSTEM),linux)
 INSTALL_NAME_TOOL_CMD:=-true
 PATCHELF_CMD:=cd $(outdir) && patchelf --set-soname libcoreclr$(SOEXT) libcoreclr$(SOEXT)
 endif
@@ -45,7 +45,7 @@ $(outdir):
 	mkdir -p $@
 
 $(outdir)/main: $(SOURCES) $(TOUCH_COPY_LIBS) $(GEN_TPA_H) | $(outdir)
-	clang $(CFLAGS) -o $@ $(SOURCES) -DCORELIB_FULL_PATH=\"$(CORELIB_FULL_PATH)\" -L$(outdir) -lcoreclr -I$(GENERATED_DIR) -I$(MONO_INCLUDE_DIR)
+	$(CC) $(CFLAGS) -o $@ $(SOURCES) -DCORELIB_FULL_PATH=\"$(CORELIB_FULL_PATH)\" -L$(outdir) -lcoreclr -I$(GENERATED_DIR) -I$(MONO_INCLUDE_DIR)
 	$(INSTALL_NAME_TOOL_CMD) $@
 
 $(TOUCH_COPY_LIBS): $(runtime_pack_dir_file) | $(outdir)

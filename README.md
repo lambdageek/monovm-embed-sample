@@ -21,7 +21,7 @@ A sample suite of projects to show how to embed the .NET 6 MonoVM in a native de
 ## Prerequisites ##
 
 * .NET 6 SDK
-* Clang (Xcode on osx, or manually install on Linux)
+* A C compiler
 * GNU Make
 * (Linux only) [`patchelf`](https://github.com/NixOS/patchelf) (Ubuntu has a .deb package)
 
