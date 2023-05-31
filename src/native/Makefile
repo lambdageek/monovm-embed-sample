@@ -10,11 +10,11 @@ absoutdir=$(abstopdir)/out/native
 
 CFLAGS=-std=c99 -g
 
-runtime_pack_dir_file?=$(topdir)/out/GetRuntimePack/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
+runtime_pack_dir_file?=$(topdir)/out/GetRuntimePack/bin/Release/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
 
 runtime_dir=$(shell cat $(runtime_pack_dir_file))/runtimes/$(RUNTIME_IDENTIFIER)/native
 
-CSHARP_SAMPLE_PUBLISH_DIR:=$(topdir)/out/CsharpSample/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/publish
+CSHARP_SAMPLE_PUBLISH_DIR:=$(topdir)/out/CsharpSample/bin/Release/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/publish
 
 MONO_INCLUDE_DIR:=$(topdir)/vendor/mono-headers/include/mono-2.0
 

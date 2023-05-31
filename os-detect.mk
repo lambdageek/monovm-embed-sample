@@ -14,3 +14,13 @@ else
 SYSTEM:=$(error could not detect the OS)
 endif
 endif
+
+UNAME_M=$(shell uname -m)
+ifeq ($(UNAME_M),arm64)
+CPUARCH=arm64
+else ifeq ($(UNAME_M),x86_64)
+CPUARCH=x64
+else
+SYSTEM:=$(error could not detech the CPU architecture)
+endif
+

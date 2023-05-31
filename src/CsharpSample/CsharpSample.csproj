@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <OutputType>Library</OutputType>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>copyused</TrimMode>
@@ -10,5 +10,15 @@
   <PropertyGroup>
     <AssemblyVersion>1.0.0.1</AssemblyVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+      <TrimmerRootDescriptor Include="MyRoots.xml" />
+  </ItemGroup>
+
+  <Target Name="_FixRootAssembly" AfterTargets="PrepareForILLink">
+    <ItemGroup>
+      <TrimmerRootAssembly Update="@(TrimmerRootAssembly)" Condition=" '%(RootMode)' == 'EntryPoint' " RootMode="Library" />
+    </ItemGroup>
+  </Target>
 
 </Project>

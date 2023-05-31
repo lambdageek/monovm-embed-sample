@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="CsharpSample">
+    <type fullname="CsharpSample.SampleClass">
+      <method name="Hello" />
+    </type>
+  </assembly>
+</linker>

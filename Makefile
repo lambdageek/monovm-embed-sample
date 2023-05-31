@@ -4,15 +4,15 @@
 include os-detect.mk
 
 # should match what's in the .csproj files
-TARGET_FRAMEWORK?=net6.0
-RUNTIME_IDENTIFIER?=$(SYSTEM)-x64
+TARGET_FRAMEWORK?=net8.0
+RUNTIME_IDENTIFIER?=$(SYSTEM)-$(CPUARCH)
 
 export TARGET_FRAMEWORK
 export RUNTIME_IDENTIFIER
 
 
 ifndef LOCAL_RUNTIME
-RUNTIME_PACK_DIR_FILE:= out/GetRuntimePack/bin/Debug/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
+RUNTIME_PACK_DIR_FILE:= out/GetRuntimePack/bin/Release/$(TARGET_FRAMEWORK)/$(RUNTIME_IDENTIFIER)/runtime-pack-dir.txt
 else
 RUNTIME_PACK_DIR_FILE:= out/local-build/runtime-pack-dir.txt
 endif
@@ -37,7 +37,7 @@ NATIVE_SRC:= \
 	src/native/gen-managed.sh \
 	src/native/main.c
 
-DOTNET_PUBLISH_ARGS=-r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) -p:TargetFramework=$(TARGET_FRAMEWORK)
+DOTNET_PUBLISH_ARGS=-r $(RUNTIME_IDENTIFIER) -f $(TARGET_FRAMEWORK) -p:TargetFramework=$(TARGET_FRAMEWORK) -c Release
 
 out/.touch-CsharpSample: $(CSHARP_SAMPLE_SRC)
 	dotnet publish $< $(DOTNET_PUBLISH_ARGS) --self-contained
