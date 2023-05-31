@@ -99,9 +99,9 @@ main (void)
 
 	void *result;
 
-	if (!use_threads)
-		result = run_something (img);
-	else {
+	if (use_threads) {
+ 		printf ("== running on a foreign thread\n");
+
 		main_thread = pthread_self ();
 
 		pthread_attr_t attr;
@@ -119,6 +119,11 @@ main (void)
 			return 1;
 		}
 	}
+
+	if (!result) {
+ 		printf ("== running on the main thread\n");
+		result = run_something (img);
+	}
 	return (int)(intptr_t)result;
 }
 
@@ -131,6 +136,7 @@ run_something (void * start_data)
 
 	if (!pthread_equal (pthread_self(), main_thread)) {
 		thread = mono_thread_attach (mono_get_root_domain ());
+ 		printf ("%% attached foreign thread\n");
 	}
 
 	MonoClass *kls = mono_class_from_name (img, "CsharpSample", "SampleClass");
@@ -161,6 +167,24 @@ run_something (void * start_data)
 
 	if (thread) {
 		mono_thread_detach (thread);
+		thread = NULL;
+		printf ("%% detached\n");
+	}
+
+
+	if (!pthread_equal (pthread_self(), main_thread)) {
+		thread = mono_thread_attach (mono_get_root_domain ());
+ 		printf ("%% attached again\n");
+	}
+	
+	obj = mono_runtime_invoke (create, NULL, (void**)&args, NULL);
+
+	mono_runtime_invoke (hello, obj, (void**)&args, NULL);
+
+	if (thread) {
+		mono_thread_detach (thread);
+		thread = NULL;
+		printf ("%% detached again\n");
 	}
 
 	fflush (stdout);
