@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <mono/jit/mono-private-unstable.h>
 #include <mono/jit/jit.h>
 #include <mono/metadata/assembly.h>
 #include <mono/metadata/class.h>
+#include <mono/metadata/threads.h>
 
 static const char* trusted_assemblies[] = {
 #undef TRUSTED_PLATFORM_ASSEMBLY
@@ -47,8 +49,15 @@ make_tpa_list (void)
 	return buf;
 }
 
+static void *
+run_something (void *ptr);
+
 /* This is a magic number that must be passed to mono_jit_init_version */
 #define FRAMEWORK_VERSION "v4.0.30319"
+
+static const char *sample_assm = "CsharpSample, Version=1.0.0.1"; /* can also specify Culture and PublicKeyToken */
+
+static pthread_t main_thread;
 
 int
 main (void)
@@ -66,8 +75,6 @@ main (void)
 		return 1;
 	}
 	printf ("runtime initialized\n");
-
-	const char *sample_assm = "CsharpSample, Version=1.0.0.1"; /* can also specify Culture and PublicKeyToken */
 
 	MonoAssemblyName *aname = mono_assembly_name_new (sample_assm);
 
@@ -88,16 +95,54 @@ main (void)
 		
 	MonoImage *img = mono_assembly_get_image (main_sample_assm);
 
+	int use_threads = 1;
+
+	void *result;
+
+	if (!use_threads)
+		result = run_something (img);
+	else {
+		main_thread = pthread_self ();
+
+		pthread_attr_t attr;
+		pthread_attr_init (&attr);
+
+		pthread_t thr;
+
+		if (pthread_create (&thr, &attr, &run_something, img) != 0)
+		{
+			perror ("could not create thread");
+			return 1;
+		}
+		if (pthread_join (thr, &result) != 0) {
+			perror ("could not join thread");
+			return 1;
+		}
+	}
+	return (int)(intptr_t)result;
+}
+
+static void *
+run_something (void * start_data)
+{
+	MonoImage *img = (MonoImage*)start_data;
+
+	MonoThread *thread = 0;
+
+	if (!pthread_equal (pthread_self(), main_thread)) {
+		thread = mono_thread_attach (mono_get_root_domain ());
+	}
+
 	MonoClass *kls = mono_class_from_name (img, "CsharpSample", "SampleClass");
 	if (!kls) {
 		printf ("Coudln't find CsharpSample.SampleClass in \"%s\"\n", sample_assm);
-		return 1;
+		return (void*)(intptr_t)1;
 	}
 
 	MonoMethod *create = mono_class_get_method_from_name (kls, "Create", 0);
 	if (!create) {
 		printf ("No Create method in CsharpSample.SampleClass\n");
-		return 1;
+		return (void*)(intptr_t)1;
 	}
 
 	void *args[1];
@@ -109,10 +154,14 @@ main (void)
 
 	if (!hello) {
 		printf ("No Hello method in CsharpSample.SampleClass\n");
-		return 1;
+		return (void*)(intptr_t)1;
 	}
 
 	mono_runtime_invoke (hello, obj, (void**)&args, NULL);
+
+	if (thread) {
+		mono_thread_detach (thread);
+	}
 
 	fflush (stdout);
 
